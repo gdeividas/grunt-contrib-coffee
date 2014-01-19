@@ -22,8 +22,12 @@ module.exports = function(grunt) {
       separator: grunt.util.linefeed
     });
 
+    var allValidFiles = []
+
     this.files.forEach(function (f) {
       var validFiles = removeInvalidFiles(f);
+
+      allValidFiles.concat(validFiles)
 
       if (options.sourceMap === true) {
         var paths = createOutputPaths(f.dest);
@@ -36,6 +40,12 @@ module.exports = function(grunt) {
         writeFile(f.dest, concatOutput(validFiles, options));
       }
     });
+
+    // Emit watch events if anyone is listening
+    if (grunt.event.listeners('coffee.compile.done').length > 0) {
+      grunt.event.emit('coffee.compile.done', allValidFiles, options);
+    }
+
   });
 
   var isLiterate = function (ext) {
